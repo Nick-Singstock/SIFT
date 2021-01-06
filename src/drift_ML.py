@@ -361,7 +361,7 @@ class drift():
         self.total_descriptors = len(corr_dic)
         if self.verbose:
             print('\nTotal Descriptors Generated:', self.total_descriptors)
-        self.analyze(best_func, corr_dic)
+        self.analyze(best_func)
         
         return {'descriptor': best_func,
                 'mae': {'train':self.train_mae,'test':self.test_mae},
