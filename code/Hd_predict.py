@@ -38,17 +38,18 @@ class Hdelta():
                        'Hg', 'Re', 'Ca', 'Li', 'Fe', ]
         single_site += ['W','As','Pm','Eu','Gd','Ho','Er','Tm','Yb','Lu']
         
-        exp_double_site = ['Cu','Fe','Ga','Mg','Ni']
+        exp_double_site = ['Cu','Fe','Ga','Mg','Ni',     'Na'] # TODO: Na  
         
-        radii = self.read_feature('average_ionic_radius') 
+        radii = self.read_feature('average_ionic_radius') #'average_ionic_radius', 'atomic_radius'
         max_r = np.max([radii[d] for d in exp_double_site])
         double_site = [el for el in single_site if radii[el] <= max_r]
         
-        double_site = single_site
+        print(len(double_site))
+#        double_site = single_site
         
-        chalcogenides = [{'S': 8}, {'S': 6, 'Se': 2}, {'S': 4, 'Se': 4}, {'S': 2, 'Se': 6},
-                         {'Se': 8}, {'Se': 6, 'Te': 2}, {'Se': 4, 'Te': 4}, {'Se': 2, 'Te': 6}, 
-                         {'Te': 8}, {'S': 6, 'Te': 2}, {'S': 4, 'Te': 4}, {'S': 2, 'Te': 6}, ]
+        chalcogenides = [{'S': 8}, ]#{'S': 6, 'Se': 2}, {'S': 4, 'Se': 4}, {'S': 2, 'Se': 6},
+#                         {'Se': 8}, {'Se': 6, 'Te': 2}, {'Se': 4, 'Te': 4}, {'Se': 2, 'Te': 6}, 
+#                         {'Te': 8}, {'S': 6, 'Te': 2}, {'S': 4, 'Te': 4}, {'S': 2, 'Te': 6}, ]
         return single_site, double_site, chalcogenides
         
     
@@ -85,13 +86,13 @@ class Hdelta():
                     cation_combinations.append({c1: 1.5, c2: 0.5})
                     if ii1 < i2: 
                         cation_combinations.append({c1: 1.0, c2: 1.0})
-                    for i3,c3 in enumerate(double):
-                        if c3 in [c1, c2]: 
-                            continue
-                        if i2 < i3:
-                            cation_combinations.append({c1: 1.0, c2: 0.5, c3: 0.5})
-                        if i2 < i3 and i2 < ii1:
-                            cation_combinations.append({c1: 0.5, c2: 0.5, c3: 0.5})
+#                    for i3,c3 in enumerate(double):
+#                        if c3 in [c1, c2]: 
+#                            continue
+#                        if i2 < i3:
+#                            cation_combinations.append({c1: 1.0, c2: 0.5, c3: 0.5})
+#                        if i2 < i3 and i2 < ii1:
+#                            cation_combinations.append({c1: 0.5, c2: 0.5, c3: 0.5})
                     
         # generate all compositons with each anion set
         all_compositions = []
@@ -232,6 +233,7 @@ if __name__ == '__main__':
     predictions = {}
     all_comps = Hd.generate_all_comps()
     print('Generated Compositions: %i' % len(all_comps))
+
     for i,comp_dic in enumerate(all_comps):
         frac_complete = i / len(all_comps)
         print("\rProgress {:2.1%}".format(frac_complete), end="\r")
@@ -243,6 +245,6 @@ if __name__ == '__main__':
     Hd.analyze_predictions(predictions)
 
 
-with open(os.path.join('..','data','predicted_decomp.json'), 'w') as f:
-    json.dump(predictions, f)
+#with open(os.path.join('..','data','predicted_decomp_all2Na.json'), 'w') as f:
+#    json.dump(predictions, f)
     
