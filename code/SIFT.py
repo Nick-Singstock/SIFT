@@ -21,7 +21,7 @@ import random
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-class drift():
+class sift():
     
     def __init__(self, data, target_prop, depth = 2, corr_function = 'rmse',
                  use_units = True, unit_data = None, keep_previous_set = True, 

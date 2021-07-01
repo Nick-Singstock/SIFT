@@ -12,7 +12,7 @@ Inputs:
 """
 
 import json
-from drift_ML import drift
+from SIFT import sift
 
 data_file = '../data/CP_comp_features_dataset.json'
 target_prop = 'dHd'
@@ -47,9 +47,9 @@ with open(data_file,'r') as f:
 with open(normalization_file,'r') as f:
     norm_constants = json.load(f)
     
-dr = drift(data, target_prop, depth = 3, testing_split = 0.2, corr_function = 'rmse',
-           use_units = True, unit_data = feat_units, keep_previous_set = True, 
-           normalize = True, norm_constants = norm_constants, verbose = True,
-           max_new_features = 500, max_complexity = 6, k_fold = (4,5))
+dr = sift(data, target_prop, depth = 3, testing_split = 0.2, corr_function = 'rmse',
+          use_units = True, unit_data = feat_units, keep_previous_set = True, 
+          normalize = True, norm_constants = norm_constants, verbose = True,
+          max_new_features = 500, max_complexity = 6, k_fold = (4,5))
 
 results = dr.run()
