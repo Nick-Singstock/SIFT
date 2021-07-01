@@ -15,6 +15,7 @@ from pymatgen.core import Element
 import os
 import csv
 import numpy as np
+import re
 
 class Hdelta():
     
@@ -106,6 +107,14 @@ class Hdelta():
         return all_compositions
     
     def get_features(self, comp_dic):
+        if 'Mo' not in comp_dic or comp_dic['Mo'] != 6:
+            print('WARNING: Script should be used for Chevrel-phases with Mo6 octahedra. '+
+                  'Other octahedra not supported.')
+        if sum([v for k,v in comp_dic.items() if k in ['S','Se','Te']]) != 8:
+            n_chalc = sum([v for k,v in comp_dic.items() if k in ['S','Se','Te']])
+            print('WARNING: Script should be used for Chevrel-phases '+
+                  'with 8 chalcogenides, %i were given.'%n_chalc)
+        
         feats = {}
         anions, cations = [], []
         for k,v in comp_dic.items():
@@ -172,6 +181,48 @@ class Hdelta():
         for a in anions:
             string += a + str(comp_dic[a])
         return string
+    
+    def formula_to_dic(self, formula):
+        assert '.' not in formula, 'ERROR: Cannot include decimals in formula. Only integers allowed.'
+        if '(' in formula:
+            first = formula.split('(')[0]
+            second = ''.join(formula.split('(')[1:]).split(')')[0]
+            coeff = ''.join(formula.split('(')[1:]).split(')')[1]
+            d = self.formula_to_dic(first)
+            for k, v in self.formula_to_dic(second).items():
+                if k in d:
+                    d[k] += v*int(coeff)
+                else:
+                    d[k] = v*int(coeff)
+            return d
+        
+        # split formula to list by number
+        spl = [s for s in re.split('(\d+)',formula) if s != '']
+        els_list = []; el_frac = [];
+        for el in spl: 
+            if sum(1 for c in el if c.isupper()) == 1 and len(el) < 3:
+                # I am a single element, add me to the list please
+                els_list.append(el)
+                el_frac.append(1)
+            elif el.isdigit() == True:
+                # I am a number and should be calculated in to self.el_frac
+                el_frac[-1] = el_frac[-1] * int(el)
+            elif sum(1 for c in el if c.isupper()) > 1:
+                # I am more than one element and am here to cause trouble
+                els_split = re.sub( r"([A-Z])", r" \1", el).split()
+                els_list += els_split
+                for i in els_split:
+                    el_frac.append(1)
+        # combine duplicate elements
+        for el in els_list:
+            inds = [i for i, j in enumerate(els_list) if j == el]
+            if len(inds) > 1:
+                drop_ind = inds[1:]
+                drop_ind = drop_ind[::-1]
+                el_frac[inds[0]] = sum(el_frac[inds[i]] for i in range(len(inds)))
+                for d in drop_ind: del els_list[d]; del el_frac[d]
+        assert len(els_list) == len(el_frac), 'ERROR: elements and coefficients not balanced in "formula_to_dic".'
+        return {els_list[i]: el_frac[i] for i,_ in enumerate(els_list)}
     
     def predict(self, features):
         normed = {k: v / self.norms[k] for k,v in features.items() if k in self.descriptor_features}
